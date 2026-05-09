@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRiMAX — Floor Plan Viewer</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { overflow: hidden; background: #1a1a1a; font-family: system-ui, sans-serif; }
+    #canvas-container { width: 100vw; height: 100vh; }
+    canvas { display: block; }
+
+    #overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 100;
+      cursor: pointer;
+    }
+    #overlay.hidden { display: none; }
+    #overlay h1 {
+      color: #fff;
+      font-size: 1.5rem;
+      font-weight: 400;
+      text-align: center;
+      line-height: 2;
+    }
+    #overlay kbd {
+      background: rgba(255,255,255,0.15);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+
+    #hud {
+      position: fixed;
+      top: 16px; left: 16px;
+      color: #fff;
+      font-size: 13px;
+      z-index: 50;
+      pointer-events: none;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    }
+
+    #controls-bar {
+      position: fixed;
+      bottom: 16px; left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      z-index: 50;
+    }
+    #controls-bar button, #controls-bar select {
+      background: rgba(0,0,0,0.6);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+    }
+    #controls-bar button:hover, #controls-bar select:hover {
+      background: rgba(255,255,255,0.15);
+    }
+    #controls-bar button.active {
+      background: rgba(255,255,255,0.25);
+      border-color: rgba(255,255,255,0.5);
+    }
+
+    #crosshair {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 20px; height: 20px;
+      z-index: 50;
+      pointer-events: none;
+    }
+    #crosshair::before, #crosshair::after {
+      content: '';
+      position: absolute;
+      background: rgba(255,255,255,0.5);
+    }
+    #crosshair::before { width: 2px; height: 100%; left: 50%; transform: translateX(-50%); }
+    #crosshair::after { height: 2px; width: 100%; top: 50%; transform: translateY(-50%); }
+    #crosshair.hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div id="canvas-container"></div>
+
+  <div id="overlay">
+    <h1>
+      PRiMAX Floor Plan Viewer<br/>
+      Click to enter &mdash; <kbd>WASD</kbd> to move &mdash; <kbd>ESC</kbd> to exit<br/>
+      <kbd>P</kbd> toggle plan overlay &mdash; <kbd>V</kbd> toggle view mode
+    </h1>
+  </div>
+
+  <div id="crosshair" class="hidden"></div>
+
+  <div id="hud"></div>
+
+  <div id="controls-bar">
+    <button id="btn-view" title="Toggle orbit/FPS view">Orbit View</button>
+    <button id="btn-overlay" title="Toggle floor plan overlay">Plan: OFF</button>
+    <select id="select-style" title="Brand style preset">
+      <option value="default">Default Style</option>
+    </select>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

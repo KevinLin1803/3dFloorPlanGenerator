@@ -1,0 +1,12 @@
+{
+  "name": "Warm Timber",
+  "floorColor": "#b5895a",
+  "wallColor": "#f7f0e6",
+  "ceilingColor": "#faf6f0",
+  "furnitureWood": "#8b6d4c",
+  "furnitureFabric": "#c9a87c",
+  "furnitureMetal": "#a08060",
+  "furnitureCeramic": "#f5efe8",
+  "counterTop": "#d4c4a8",
+  "lightingTemp": 3200
+}

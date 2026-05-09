@@ -1,0 +1,12 @@
+{
+  "name": "Cool Concrete",
+  "floorColor": "#a0a0a0",
+  "wallColor": "#e8e8e8",
+  "ceilingColor": "#f0f0f0",
+  "furnitureWood": "#606060",
+  "furnitureFabric": "#4a5568",
+  "furnitureMetal": "#718096",
+  "furnitureCeramic": "#edf2f7",
+  "counterTop": "#b0b0b0",
+  "lightingTemp": 5500
+}

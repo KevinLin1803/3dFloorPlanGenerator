@@ -1,0 +1,179 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PRiMAX Floor Plan Schema",
+  "description": "Structured representation of a 2D floor plan for procedural 3D generation. All spatial values in millimeters, origin at top-left (image coordinates).",
+  "type": "object",
+  "required": ["metadata", "walls", "openings", "rooms"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": ["ceilingHeight", "planWidth", "planHeight"],
+      "properties": {
+        "scale": {
+          "type": "number",
+          "description": "Millimeters per pixel in the source image"
+        },
+        "ceilingHeight": {
+          "type": "number",
+          "description": "Floor-to-ceiling height in mm",
+          "default": 2700
+        },
+        "planWidth": {
+          "type": "number",
+          "description": "Total plan width in mm"
+        },
+        "planHeight": {
+          "type": "number",
+          "description": "Total plan height in mm"
+        },
+        "sourceImage": {
+          "type": "string",
+          "description": "Filename of the original floor plan image"
+        }
+      }
+    },
+    "walls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "start", "end", "thickness"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique wall identifier (e.g. w0, w1)"
+          },
+          "start": {
+            "type": "array",
+            "items": { "type": "number" },
+            "minItems": 2,
+            "maxItems": 2,
+            "description": "[x, y] start point in mm"
+          },
+          "end": {
+            "type": "array",
+            "items": { "type": "number" },
+            "minItems": 2,
+            "maxItems": 2,
+            "description": "[x, y] end point in mm"
+          },
+          "thickness": {
+            "type": "number",
+            "description": "Wall thickness in mm",
+            "default": 150
+          }
+        }
+      }
+    },
+    "openings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "wallId", "position", "type", "width", "height"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique opening identifier (e.g. o0, o1)"
+          },
+          "wallId": {
+            "type": "string",
+            "description": "ID of the wall this opening is in"
+          },
+          "position": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Fractional position along the wall (0=start, 1=end), measured to center of opening"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["door", "window"],
+            "description": "Opening type"
+          },
+          "width": {
+            "type": "number",
+            "description": "Opening width in mm"
+          },
+          "height": {
+            "type": "number",
+            "description": "Opening height in mm"
+          },
+          "sillHeight": {
+            "type": "number",
+            "description": "Height from floor to bottom of opening in mm (0 for doors)",
+            "default": 0
+          }
+        }
+      }
+    },
+    "rooms": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "polygon"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique room identifier (e.g. r0, r1)"
+          },
+          "label": {
+            "type": "string",
+            "description": "Room name (e.g. Living Room, Kitchen)"
+          },
+          "polygon": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": { "type": "number" },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "minItems": 3,
+            "description": "Ordered polygon vertices [x, y] in mm. Last point connects to first."
+          }
+        }
+      }
+    },
+    "furniture": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "position", "rotation", "width", "depth"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique furniture identifier (e.g. f0, f1)"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "bed_single", "bed_double", "sofa", "dining_table", "chair",
+              "toilet", "sink", "bathtub", "kitchen_counter", "wardrobe",
+              "desk", "washing_machine", "fridge", "shower"
+            ],
+            "description": "Furniture type, mapped to a procedural geometry builder"
+          },
+          "position": {
+            "type": "array",
+            "items": { "type": "number" },
+            "minItems": 2,
+            "maxItems": 2,
+            "description": "[x, y] center position in mm"
+          },
+          "rotation": {
+            "type": "number",
+            "description": "Rotation in degrees (clockwise from plan-right/+X)",
+            "default": 0
+          },
+          "width": {
+            "type": "number",
+            "description": "Extent along local X axis in mm"
+          },
+          "depth": {
+            "type": "number",
+            "description": "Extent along local Y axis in mm"
+          }
+        }
+      }
+    }
+  }
+}

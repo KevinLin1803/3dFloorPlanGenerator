@@ -1,0 +1,238 @@
+import * as THREE from 'three';
+
+/**
+ * Convert JSON mm coordinates to Three.js meters.
+ * JSON: X right, Y down (image coords)
+ * Three.js: X right, Y up, Z toward camera
+ * Mapping: jsonX → X, jsonY → -Z, height → Y
+ */
+function toWorld(x, y) {
+  return new THREE.Vector3(x / 1000, 0, -y / 1000);
+}
+
+/**
+ * Build all architectural geometry from a parsed floor plan JSON.
+ * Returns { group, wallAABBs } where wallAABBs is used for collision.
+ */
+export function buildGeometry(plan, materials) {
+  const group = new THREE.Group();
+  const wallAABBs = [];
+  const ceilingH = (plan.metadata.ceilingHeight || 2700) / 1000; // meters
+
+  // Index walls by id for opening lookup
+  const wallMap = new Map();
+  for (const wall of plan.walls) {
+    wallMap.set(wall.id, wall);
+  }
+
+  // Group openings by wall id
+  const openingsByWall = new Map();
+  for (const opening of (plan.openings || [])) {
+    if (!openingsByWall.has(opening.wallId)) {
+      openingsByWall.set(opening.wallId, []);
+    }
+    openingsByWall.get(opening.wallId).push(opening);
+  }
+
+  // --- FLOOR ---
+  buildFloor(plan, materials, group, ceilingH);
+
+  // --- CEILING (separate group for toggling) ---
+  const ceilingGroup = new THREE.Group();
+  ceilingGroup.name = 'ceiling';
+  buildCeiling(plan, materials, ceilingGroup, ceilingH);
+  group.add(ceilingGroup);
+
+  // --- WALLS ---
+  for (const wall of plan.walls) {
+    const openings = openingsByWall.get(wall.id) || [];
+    buildWall(wall, openings, ceilingH, materials, group, wallAABBs);
+  }
+
+  return { group, wallAABBs, ceilingGroup };
+}
+
+function buildFloor(plan, materials, group, ceilingH) {
+  // Build floor from room polygons if available, otherwise from plan extents
+  if (plan.rooms && plan.rooms.length > 0) {
+    for (const room of plan.rooms) {
+      const shape = new THREE.Shape();
+      const pts = room.polygon;
+      // Map to XZ plane: jsonX → x, jsonY → -z but Shape is 2D (x, y)
+      // We'll create shape in XY then rotate to XZ
+      shape.moveTo(pts[0][0] / 1000, -pts[0][1] / 1000);
+      for (let i = 1; i < pts.length; i++) {
+        shape.lineTo(pts[i][0] / 1000, -pts[i][1] / 1000);
+      }
+      shape.lineTo(pts[0][0] / 1000, -pts[0][1] / 1000);
+
+      const geo = new THREE.ShapeGeometry(shape);
+      // ShapeGeometry lies in XY plane, rotate to XZ (floor)
+      geo.rotateX(-Math.PI / 2);
+      const mesh = new THREE.Mesh(geo, materials.floor);
+      mesh.receiveShadow = true;
+      mesh.position.y = 0;
+      group.add(mesh);
+    }
+  } else {
+    // Fallback: full plan extents
+    const w = plan.metadata.planWidth / 1000;
+    const h = plan.metadata.planHeight / 1000;
+    const geo = new THREE.PlaneGeometry(w, h);
+    geo.rotateX(-Math.PI / 2);
+    const mesh = new THREE.Mesh(geo, materials.floor);
+    mesh.position.set(w / 2, 0, -h / 2);
+    mesh.receiveShadow = true;
+    group.add(mesh);
+  }
+}
+
+function buildCeiling(plan, materials, group, ceilingH) {
+  if (plan.rooms && plan.rooms.length > 0) {
+    for (const room of plan.rooms) {
+      const shape = new THREE.Shape();
+      const pts = room.polygon;
+      shape.moveTo(pts[0][0] / 1000, -pts[0][1] / 1000);
+      for (let i = 1; i < pts.length; i++) {
+        shape.lineTo(pts[i][0] / 1000, -pts[i][1] / 1000);
+      }
+      shape.lineTo(pts[0][0] / 1000, -pts[0][1] / 1000);
+
+      const geo = new THREE.ShapeGeometry(shape);
+      geo.rotateX(Math.PI / 2); // flip for ceiling (face down)
+      const mesh = new THREE.Mesh(geo, materials.ceiling);
+      mesh.position.y = ceilingH;
+      group.add(mesh);
+    }
+  }
+}
+
+/**
+ * Build a wall with openings using segment decomposition.
+ *
+ * Strategy: split the wall into vertical strips. Solid strips are full-height boxes.
+ * Opening strips are decomposed into sub-boxes (above door, below/above window).
+ * Walls are extended by half-thickness at each end for miter corners.
+ */
+function buildWall(wall, openings, ceilingH, materials, group, wallAABBs) {
+  const startX = wall.start[0] / 1000;
+  const startZ = -wall.start[1] / 1000;
+  const endX = wall.end[0] / 1000;
+  const endZ = -wall.end[1] / 1000;
+  const thickness = (wall.thickness || 150) / 1000;
+
+  const dx = endX - startX;
+  const dz = endZ - startZ;
+  const wallLength = Math.sqrt(dx * dx + dz * dz);
+  if (wallLength < 0.001) return;
+
+  // Wall direction and normal
+  const dirX = dx / wallLength;
+  const dirZ = dz / wallLength;
+
+  // Wall angle for rotation
+  const angle = Math.atan2(dz, dx);
+
+  // Extend wall by half-thickness at each end (miter)
+  const extStartX = startX - dirX * thickness / 2;
+  const extStartZ = startZ - dirZ * thickness / 2;
+  const extLength = wallLength + thickness;
+
+  // Sort openings by position
+  const sorted = [...openings].sort((a, b) => a.position - b.position);
+
+  // Convert opening positions to absolute distances along the ORIGINAL wall
+  // (position is relative to original wall, not extended wall)
+  const openingSpecs = sorted.map(o => {
+    const centerDist = o.position * wallLength;
+    const halfW = (o.width / 1000) / 2;
+    return {
+      leftDist: centerDist - halfW,
+      rightDist: centerDist + halfW,
+      type: o.type,
+      height: (o.height || 2100) / 1000,
+      sillHeight: (o.sillHeight || 0) / 1000
+    };
+  });
+
+  // Offset for the extension: opening distances are relative to original start,
+  // but our strips start at extStart which is thickness/2 before original start
+  const extOffset = thickness / 2;
+
+  // Build strips along the extended wall
+  // Strip boundaries (distances from extStart)
+  const strips = [];
+  let cursor = 0; // distance from extStart
+
+  for (const spec of openingSpecs) {
+    const oLeft = spec.leftDist + extOffset;
+    const oRight = spec.rightDist + extOffset;
+
+    // Solid strip before this opening
+    if (oLeft > cursor + 0.001) {
+      strips.push({ from: cursor, to: oLeft, type: 'solid' });
+    }
+    // Opening strip
+    strips.push({ from: oLeft, to: oRight, type: 'opening', spec });
+    cursor = oRight;
+  }
+  // Final solid strip
+  if (cursor < extLength - 0.001) {
+    strips.push({ from: cursor, to: extLength, type: 'solid' });
+  }
+
+  // If no openings, single solid strip
+  if (strips.length === 0) {
+    strips.push({ from: 0, to: extLength, type: 'solid' });
+  }
+
+  for (const strip of strips) {
+    const stripLen = strip.to - strip.from;
+    if (stripLen < 0.001) continue;
+
+    const stripCenterDist = (strip.from + strip.to) / 2;
+    const cx = extStartX + dirX * stripCenterDist;
+    const cz = extStartZ + dirZ * stripCenterDist;
+
+    if (strip.type === 'solid') {
+      // Full-height wall box
+      addWallBox(cx, cz, stripLen, ceilingH, thickness, angle, 0, materials.wall, group, wallAABBs);
+    } else {
+      // Opening strip — decompose
+      const { spec } = strip;
+
+      // Above opening
+      const aboveH = ceilingH - (spec.sillHeight + spec.height);
+      if (aboveH > 0.01) {
+        const aboveY = spec.sillHeight + spec.height;
+        addWallBox(cx, cz, stripLen, aboveH, thickness, angle, aboveY, materials.wall, group, wallAABBs);
+      }
+
+      // Below opening (windows only)
+      if (spec.sillHeight > 0.01) {
+        addWallBox(cx, cz, stripLen, spec.sillHeight, thickness, angle, 0, materials.wall, group, wallAABBs);
+      }
+    }
+  }
+}
+
+/**
+ * Add a single wall box segment.
+ */
+function addWallBox(cx, cz, length, height, thickness, angle, baseY, material, group, wallAABBs) {
+  const geo = new THREE.BoxGeometry(length, height, thickness);
+  const mesh = new THREE.Mesh(geo, material);
+
+  // Position: center of the box
+  mesh.position.set(cx, baseY + height / 2, cz);
+  mesh.rotation.y = -angle;
+
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  group.add(mesh);
+
+  // Compute AABB for collision
+  mesh.updateMatrixWorld(true);
+  const aabb = new THREE.Box3().setFromObject(mesh);
+  wallAABBs.push(aabb);
+}
