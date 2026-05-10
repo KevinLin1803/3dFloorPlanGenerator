@@ -350,6 +350,7 @@
       "name": "DINING",
       "type": "room",
       "label": "DINING 3.8 x 3.0",
+      "dimensionsMm": [3800, 3000],
       "polygon": [
         [0, 0],
         [3800, 0],
@@ -363,6 +364,7 @@
       "name": "LIVING",
       "type": "room",
       "label": "LIVING 3.8 x 3.3",
+      "dimensionsMm": [3800, 3300],
       "polygon": [
         [3800, 0],
         [5700, 0],
@@ -376,6 +378,7 @@
       "name": "KITCHEN",
       "type": "room",
       "label": "KITCHEN 2.8 x 2.7",
+      "dimensionsMm": [2800, 2700],
       "polygon": [
         [0, 4100],
         [3800, 4100],
@@ -803,34 +806,31 @@
     { "id": "f3",  "type": "chair",           "position": [700, 1750],   "rotation": 90,  "width": 450,  "depth": 450 },
     { "id": "f4",  "type": "chair",           "position": [2000, 1750],  "rotation": 270, "width": 450,  "depth": 450 },
 
-    { "id": "f5",  "type": "sofa",            "position": [4600, 1150],  "rotation": 0,   "width": 2200, "depth": 850 },
+    { "id": "f5",  "type": "sofa",            "position": [4600, 1150],  "rotation": 180,   "width": 2200, "depth": 850 },
     { "id": "f6",  "type": "chair",           "position": [3550, 2100],  "rotation": 90,  "width": 750,  "depth": 750 },
     { "id": "f7",  "type": "chair",           "position": [3550, 2900],  "rotation": 90,  "width": 750,  "depth": 750 },
     { "id": "f8",  "type": "dining_table",    "position": [4750, 2550],  "rotation": 0,   "width": 1000, "depth": 600 },
     { "id": "f9",  "type": "desk",            "position": [4750, 3800],  "rotation": 0,   "width": 1900, "depth": 350 },
 
-    { "id": "f10", "type": "kitchen_counter", "position": [1350, 4050],  "rotation": 0,   "width": 1900, "depth": 650 },
+    { "id": "f10", "type": "kitchen_counter", "position": [1350, 4050],  "rotation": 0,   "width": 2800, "depth": 650 },
     { "id": "f11", "type": "sink",            "position": [1150, 4050],  "rotation": 0,   "width": 550,  "depth": 420 },
     { "id": "f12", "type": "kitchen_counter", "position": [1400, 5800],  "rotation": 0,   "width": 2800, "depth": 500 },
     { "id": "f13", "type": "kitchen_counter", "position": [1850, 5800],  "rotation": 0,   "width": 600,  "depth": 450 },
-    { "id": "f14", "type": "fridge",          "position": [2450, 4200],  "rotation": 0,   "width": 700,  "depth": 700 },
+    { "id": "f14", "type": "fridge",          "position": [450, 5800],  "rotation": 0,   "width": 700,  "depth": 502 },
 
     { "id": "f15", "type": "bathtub",         "position": [550, 6800],   "rotation": 0,   "width": 900,  "depth": 900 },
     { "id": "f16", "type": "toilet",          "position": [1650, 7000],  "rotation": 0,   "width": 450,  "depth": 700 },
     { "id": "f17", "type": "sink",            "position": [2350, 7200],  "rotation": 0,   "width": 700,  "depth": 450 },
 
-    { "id": "f18", "type": "bed_double",      "position": [5300, 5700],  "rotation": 0,   "width": 1530, "depth": 2030 },
-    { "id": "f19", "type": "wardrobe",        "position": [5300, 6875],  "rotation": 0,   "width": 2600, "depth": 450 },
-    { "id": "f20", "type": "desk",            "position": [4300, 6200],  "rotation": 0,   "width": 450,  "depth": 450 },
-    { "id": "f21", "type": "desk",            "position": [6300, 6200],  "rotation": 0,   "width": 450,  "depth": 450 },
+    { "id": "f18", "type": "bed_double",      "position": [5300, 6000],  "rotation": 0,   "width": 1530, "depth": 2030 },
+    { "id": "f19", "type": "wardrobe",        "position": [4700, 4500],  "rotation": 180,   "width": 1800, "depth": 450 },
+    { "id": "f20", "type": "desk",            "position": [4300, 6800],  "rotation": 0,   "width": 450,  "depth": 450 },
+    { "id": "f21", "type": "desk",            "position": [6300, 6800],  "rotation": 0,   "width": 450,  "depth": 450 },
 
     { "id": "f22", "type": "bed_double",      "position": [5300, 8900],  "rotation": 0,   "width": 1530, "depth": 2030 },
     { "id": "f23", "type": "wardrobe",        "position": [5300, 9875],  "rotation": 0,   "width": 2600, "depth": 450 },
     { "id": "f24", "type": "desk",            "position": [4300, 9400],  "rotation": 0,   "width": 450,  "depth": 450 },
     { "id": "f25", "type": "desk",            "position": [6300, 9400],  "rotation": 0,   "width": 450,  "depth": 450 },
-
-    { "id": "f26", "type": "dining_table",    "position": [6500, 650],   "rotation": 0,   "width": 700,  "depth": 700 },
-    { "id": "f27", "type": "sofa",            "position": [8650, 8250],  "rotation": 0,   "width": 1800, "depth": 750 },
 
     { "id": "f28", "type": "bed_double",      "position": [9550, 11100], "rotation": 0,   "width": 1900, "depth": 1530 },
     { "id": "f29", "type": "wardrobe",        "position": [8500, 12475], "rotation": 0,   "width": 3300, "depth": 450 },

@@ -258,6 +258,49 @@ function updateHUD() {
   ].join('<br>');
 }
 
+function onMouseMove(event) {
+  const tooltip = document.getElementById('room-tooltip');
+
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  raycaster.setFromCamera(mouse, camera);
+  const intersects = raycaster.intersectObjects(scene.children, true);
+
+  let hit = null;
+  for (const i of intersects) {
+    if (i.object.userData._roomFloor) {
+      hit = i.object.userData._room;
+      break;
+    }
+  }
+
+  if (hit) {
+    const name = hit.name || hit.id;
+    const dims = hit.dimensionsMm;
+    let text = name;
+    if (dims) {
+      text += ` — ${(dims[0] / 1000).toFixed(1)}m \u00d7 ${(dims[1] / 1000).toFixed(1)}m`;
+    } else if (hit.polygon) {
+      // Compute bounding dimensions from polygon
+      let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+      for (const pt of hit.polygon) {
+        minX = Math.min(minX, pt[0]); maxX = Math.max(maxX, pt[0]);
+        minY = Math.min(minY, pt[1]); maxY = Math.max(maxY, pt[1]);
+      }
+      const w = (maxX - minX) / 1000;
+      const d = (maxY - minY) / 1000;
+      text += ` — ${w.toFixed(1)}m \u00d7 ${d.toFixed(1)}m`;
+    }
+    tooltip.textContent = text;
+    tooltip.style.display = 'block';
+    tooltip.style.left = (event.clientX + 14) + 'px';
+    tooltip.style.top = (event.clientY + 14) + 'px';
+  } else {
+    tooltip.style.display = 'none';
+  }
+}
+
 function onResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
