@@ -9,6 +9,7 @@ import { createOverlay, toggleOverlay } from './overlay.js';
 let scene, camera, renderer, controls, clock;
 let overlayGroup;
 let currentPlan;
+let currentPlanUrl = '/data/sanctuary-quarter-1.01.json';
 
 // --- Init ---
 async function init() {
@@ -38,7 +39,13 @@ async function init() {
   setupLighting();
 
   // Load default plan
-  await loadPlan('/data/sample-2bed.json');
+  await loadPlan('/data/sanctuary-quarter-1.01.json');
+
+  // Plan selector
+  document.getElementById('select-plan').addEventListener('change', async (e) => {
+    await loadPlan(e.target.value);
+    document.getElementById('select-style').value = 'default';
+  });
 
   // Load style presets
   await loadStylePresets();
@@ -81,6 +88,7 @@ function setupLighting() {
 }
 
 async function loadPlan(url, styleConfig) {
+  currentPlanUrl = url;
   const res = await fetch(url);
   currentPlan = await res.json();
 
@@ -204,12 +212,12 @@ async function loadStylePresets() {
   select.addEventListener('change', async () => {
     const val = select.value;
     if (val === 'default') {
-      await loadPlan('/data/sample-2bed.json');
+      await loadPlan(currentPlanUrl);
     } else {
       try {
         const res = await fetch(`/styles/${val}.json`);
         const style = await res.json();
-        await loadPlan('/data/sample-2bed.json', style);
+        await loadPlan(currentPlanUrl, style);
       } catch (e) {
         console.error('Failed to load style:', e);
       }

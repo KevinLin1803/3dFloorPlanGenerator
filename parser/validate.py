@@ -49,8 +49,33 @@ def validate_plan(plan: dict) -> dict:
     return report
 
 
+def _point_on_segment(pt, seg_start, seg_end, tolerance=100):
+    """Check if a point lies on a wall segment (T-junction detection)."""
+    # Vector from seg_start to seg_end
+    dx = seg_end[0] - seg_start[0]
+    dy = seg_end[1] - seg_start[1]
+    seg_len = math.sqrt(dx * dx + dy * dy)
+    if seg_len < 1:
+        return False
+
+    # Project pt onto the line
+    t = ((pt[0] - seg_start[0]) * dx + (pt[1] - seg_start[1]) * dy) / (seg_len * seg_len)
+    if t < 0.01 or t > 0.99:  # Must be interior, not at endpoints
+        return False
+
+    # Distance from pt to the closest point on segment
+    proj_x = seg_start[0] + t * dx
+    proj_y = seg_start[1] + t * dy
+    dist = math.sqrt((pt[0] - proj_x) ** 2 + (pt[1] - proj_y) ** 2)
+    return dist <= tolerance
+
+
 def check_wall_closure(walls: list) -> dict:
-    """Check if walls form closed polygons using union-find on snapped endpoints."""
+    """Check if walls form closed polygons.
+
+    Accounts for T-junctions where an interior wall endpoint lies on
+    an exterior wall segment (not at its endpoints).
+    """
     if not walls:
         return {"score": 0, "issues": ["No walls found"]}
 
@@ -86,24 +111,44 @@ def check_wall_closure(walls: list) -> dict:
         degree[sp] += 1
         degree[ep] += 1
 
-    # Check: for closed polygons, every node should have even degree
+    # Check for T-junctions: endpoints with degree 1 that lie on another wall segment
+    # These are valid connections, not dead ends
+    t_junction_points = set()
+    degree_1_points = [pt for pt, deg in degree.items() if deg == 1]
+    for pt in degree_1_points:
+        for wall in walls:
+            ws = tuple(wall["start"])
+            we = tuple(wall["end"])
+            # Skip walls that have this point as an endpoint
+            if snapped[ws] == pt or snapped[we] == pt:
+                continue
+            if _point_on_segment(pt, ws, we):
+                t_junction_points.add(pt)
+                break
+
+    # Filter out T-junction points from issues
     issues = []
-    odd_degree_points = [pt for pt, deg in degree.items() if deg % 2 != 0]
 
-    if odd_degree_points:
-        for pt in odd_degree_points[:5]:  # Report up to 5
-            issues.append(
-                f"Wall endpoint at [{pt[0]:.0f}, {pt[1]:.0f}] has odd degree "
-                f"({degree[pt]}), suggesting an open wall segment"
-            )
+    # Odd-degree points (excluding T-junctions)
+    odd_degree_points = [
+        pt for pt, deg in degree.items()
+        if deg % 2 != 0 and pt not in t_junction_points
+    ]
+    for pt in odd_degree_points[:5]:
+        issues.append(
+            f"Wall endpoint at [{pt[0]:.0f}, {pt[1]:.0f}] has odd degree "
+            f"({degree[pt]}), suggesting an open wall segment"
+        )
 
-    # Also check for isolated segments (degree-1 endpoints = dead ends)
-    dead_ends = [pt for pt, deg in degree.items() if deg == 1]
-    if dead_ends:
-        for pt in dead_ends[:5]:
-            issues.append(
-                f"Dead-end wall at [{pt[0]:.0f}, {pt[1]:.0f}] — wall doesn't connect to anything"
-            )
+    # Dead ends (degree 1, not T-junctions)
+    dead_ends = [
+        pt for pt, deg in degree.items()
+        if deg == 1 and pt not in t_junction_points
+    ]
+    for pt in dead_ends[:5]:
+        issues.append(
+            f"Dead-end wall at [{pt[0]:.0f}, {pt[1]:.0f}] — wall doesn't connect to anything"
+        )
 
     total_points = len(degree)
     problem_points = len(odd_degree_points) + len(dead_ends)

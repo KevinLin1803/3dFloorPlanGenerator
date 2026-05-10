@@ -40,7 +40,7 @@ def encode_image(image_path: str) -> tuple[str, str]:
 
 def parse_floor_plan(
     image_path: str,
-    model: str = "claude-sonnet-4-20250514",
+    model: str = "claude-sonnet-4-6",
     max_retries: int = 2,
     validate: bool = True,
 ) -> dict:
@@ -167,7 +167,7 @@ def main():
     )
     parser.add_argument(
         "--model",
-        default="claude-sonnet-4-20250514",
+        default="claude-sonnet-4-6",
         help="Claude model to use",
     )
     parser.add_argument(
