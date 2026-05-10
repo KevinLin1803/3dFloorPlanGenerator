@@ -266,20 +266,20 @@ function addRoomLabel(room, group) {
 
   const name = room.name || room.id;
   const canvas = document.createElement('canvas');
-  canvas.width = 256;
-  canvas.height = 64;
+  canvas.width = 512;
+  canvas.height = 128;
   const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#555';
-  ctx.font = 'bold 28px system-ui, sans-serif';
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 48px system-ui, sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(name, 128, 32);
+  ctx.fillText(name, 256, 64);
 
   const texture = new THREE.CanvasTexture(canvas);
   const mat = new THREE.SpriteMaterial({ map: texture, depthTest: false, transparent: true });
   const sprite = new THREE.Sprite(mat);
   sprite.position.set(cx, 0.05, cz);
-  sprite.scale.set(1.2, 0.3, 1);
+  sprite.scale.set(2.0, 0.5, 1);
   sprite.userData._primax = true;
   sprite.userData._roomLabel = true;
   group.add(sprite);
