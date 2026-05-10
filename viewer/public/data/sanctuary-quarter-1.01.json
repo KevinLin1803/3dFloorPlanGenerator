@@ -828,14 +828,14 @@
     { "id": "f21", "type": "desk",            "position": [6300, 6800],  "rotation": 0,   "width": 450,  "depth": 450 },
 
     { "id": "f22", "type": "bed_double",      "position": [5300, 8900],  "rotation": 0,   "width": 1530, "depth": 2030 },
-    { "id": "f23", "type": "wardrobe",        "position": [5300, 9875],  "rotation": 0,   "width": 2600, "depth": 450 },
-    { "id": "f24", "type": "desk",            "position": [4300, 9400],  "rotation": 0,   "width": 450,  "depth": 450 },
-    { "id": "f25", "type": "desk",            "position": [6300, 9400],  "rotation": 0,   "width": 450,  "depth": 450 },
+    { "id": "f23", "type": "wardrobe",        "position": [5300, 7325],  "rotation": 180,   "width": 3000, "depth": 450 },
+    { "id": "f24", "type": "desk",            "position": [4300, 9700],  "rotation": 0,   "width": 450,  "depth": 450 },
+    { "id": "f25", "type": "desk",            "position": [6300, 9700],  "rotation": 0,   "width": 450,  "depth": 450 },
 
-    { "id": "f28", "type": "bed_double",      "position": [9550, 11100], "rotation": 0,   "width": 1900, "depth": 1530 },
-    { "id": "f29", "type": "wardrobe",        "position": [8500, 12475], "rotation": 0,   "width": 3300, "depth": 450 },
-    { "id": "f30", "type": "desk",            "position": [10200, 10150],"rotation": 0,   "width": 450,  "depth": 450 },
-    { "id": "f31", "type": "desk",            "position": [10200, 12050],"rotation": 0,   "width": 450,  "depth": 450 },
+    { "id": "f28", "type": "bed_double",      "position": [9550, 11100], "rotation": 270,   "width": 1530, "depth": 1530 },
+    { "id": "f29", "type": "wardrobe",        "position": [8900, 12300], "rotation": 0,   "width": 3000, "depth": 200 },
+    { "id": "f30", "type": "desk",            "position": [10200, 10150],"rotation": 0,   "width": 350,  "depth": 350 },
+    { "id": "f31", "type": "desk",            "position": [10200, 12050],"rotation": 0,   "width": 350,  "depth": 350 },
 
     { "id": "f32", "type": "washing_machine", "position": [4425, 12350], "rotation": 0,   "width": 600,  "depth": 600 },
     { "id": "f33", "type": "sink",            "position": [4425, 11650], "rotation": 0,   "width": 600,  "depth": 500 },
