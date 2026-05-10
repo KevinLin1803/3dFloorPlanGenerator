@@ -49,6 +49,11 @@ export function buildGeometry(plan, materials) {
     buildWall(wall, openings, ceilingH, materials, group, wallAABBs);
   }
 
+  // --- WALL LABELS ---
+  for (const wall of plan.walls) {
+    addWallLabel(wall, ceilingH, group);
+  }
+
   return { group, wallAABBs, ceilingGroup };
 }
 
@@ -58,16 +63,15 @@ function buildFloor(plan, materials, group, ceilingH) {
     for (const room of plan.rooms) {
       const shape = new THREE.Shape();
       const pts = room.polygon;
-      // Map to XZ plane: jsonX → x, jsonY → -z but Shape is 2D (x, y)
-      // We'll create shape in XY then rotate to XZ
-      shape.moveTo(pts[0][0] / 1000, -pts[0][1] / 1000);
+      // Shape in XY, then rotateX(-PI/2) maps (x, y, 0) → (x, 0, -y)
+      // We want world Z = -jsonY/1000 (matching walls), so shape Y = jsonY/1000
+      shape.moveTo(pts[0][0] / 1000, pts[0][1] / 1000);
       for (let i = 1; i < pts.length; i++) {
-        shape.lineTo(pts[i][0] / 1000, -pts[i][1] / 1000);
+        shape.lineTo(pts[i][0] / 1000, pts[i][1] / 1000);
       }
-      shape.lineTo(pts[0][0] / 1000, -pts[0][1] / 1000);
+      shape.lineTo(pts[0][0] / 1000, pts[0][1] / 1000);
 
       const geo = new THREE.ShapeGeometry(shape);
-      // ShapeGeometry lies in XY plane, rotate to XZ (floor)
       geo.rotateX(-Math.PI / 2);
       const mesh = new THREE.Mesh(geo, materials.floor);
       mesh.receiveShadow = true;
@@ -92,6 +96,7 @@ function buildCeiling(plan, materials, group, ceilingH) {
     for (const room of plan.rooms) {
       const shape = new THREE.Shape();
       const pts = room.polygon;
+      // Ceiling rotateX(PI/2) maps (x, y, 0) → (x, 0, y), so shape Y = -jsonY/1000
       shape.moveTo(pts[0][0] / 1000, -pts[0][1] / 1000);
       for (let i = 1; i < pts.length; i++) {
         shape.lineTo(pts[i][0] / 1000, -pts[i][1] / 1000);
@@ -214,6 +219,35 @@ function buildWall(wall, openings, ceilingH, materials, group, wallAABBs) {
       }
     }
   }
+}
+
+/**
+ * Add a text label sprite at the midpoint of a wall.
+ */
+function addWallLabel(wall, ceilingH, group) {
+  const midX = (wall.start[0] + wall.end[0]) / 2 / 1000;
+  const midZ = -(wall.start[1] + wall.end[1]) / 2 / 1000;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = 128;
+  canvas.height = 64;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = 'rgba(0,0,0,0.7)';
+  ctx.fillRect(4, 4, 120, 56);
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 32px monospace';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(wall.id, 64, 32);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  const mat = new THREE.SpriteMaterial({ map: texture, depthTest: false });
+  const sprite = new THREE.Sprite(mat);
+  sprite.position.set(midX, ceilingH * 0.6, midZ);
+  sprite.scale.set(0.6, 0.3, 1);
+  sprite.userData._primax = true;
+  sprite.userData._wallLabel = true;
+  group.add(sprite);
 }
 
 /**
