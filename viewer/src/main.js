@@ -10,6 +10,8 @@ let scene, camera, renderer, controls, clock;
 let overlayGroup;
 let currentPlan;
 let currentPlanUrl = '/data/sanctuary-quarter-1.01.json';
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
 
 // --- Init ---
 async function init() {
@@ -55,6 +57,9 @@ async function init() {
 
   // Keyboard shortcuts
   document.addEventListener('keydown', onGlobalKey);
+
+  // Room hover tooltip
+  renderer.domElement.addEventListener('mousemove', onMouseMove);
 
   // Start render loop
   animate();
@@ -125,7 +130,7 @@ async function loadPlan(url, styleConfig) {
 
   // Compute plan center for camera/controls
   const planCenterX = (currentPlan.metadata.planWidth / 1000) / 2;
-  const planCenterZ = -(currentPlan.metadata.planHeight / 1000) / 2;
+  const planCenterZ = (currentPlan.metadata.planHeight / 1000) / 2;
   const planCenter = new THREE.Vector3(planCenterX, 0, planCenterZ);
 
   // Setup controls
@@ -151,7 +156,7 @@ function addRoomLights(plan) {
     cy = (cy / room.polygon.length) / 1000;
 
     const light = new THREE.PointLight(0xfff0dd, 0.5, 8, 1.5);
-    light.position.set(cx, ceilingH - 0.1, -cy);
+    light.position.set(cx, ceilingH - 0.1, cy);
     light.userData._primax = true;
     scene.add(light);
   }

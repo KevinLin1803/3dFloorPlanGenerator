@@ -2,13 +2,15 @@ import * as THREE from 'three';
 
 // Default material palette — overridden by brand config
 const DEFAULT_PALETTE = {
-  floorColor: '#c4a882',
+  floorColor: '#ffffff',
+  roomFloorColor: '#c4a882',
   wallColor: '#f5f0eb',
   ceilingColor: '#ffffff',
   furnitureWood: '#b08968',
   furnitureFabric: '#8b9dc3',
   furnitureMetal: '#c0c0c0',
   furnitureCeramic: '#f0f0f0',
+  terraceFloor: '#a8c5a0',
   counterTop: '#e8e0d8',
   lightingTemp: 4500
 };
@@ -64,6 +66,18 @@ export function createMaterials() {
       color: activePalette.furnitureCeramic,
       roughness: 0.4,
       metalness: 0.1
+    }),
+    roomFloor: new THREE.MeshStandardMaterial({
+      color: activePalette.roomFloorColor,
+      roughness: 0.8,
+      metalness: 0.0,
+      side: THREE.DoubleSide
+    }),
+    terraceFloor: new THREE.MeshStandardMaterial({
+      color: activePalette.terraceFloor,
+      roughness: 0.9,
+      metalness: 0.0,
+      side: THREE.DoubleSide
     }),
     counterTop: new THREE.MeshStandardMaterial({
       color: activePalette.counterTop,

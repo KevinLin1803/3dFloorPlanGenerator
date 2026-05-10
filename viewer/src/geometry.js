@@ -3,11 +3,11 @@ import * as THREE from 'three';
 /**
  * Convert JSON mm coordinates to Three.js meters.
  * JSON: X right, Y down (image coords)
- * Three.js: X right, Y up, Z toward camera
- * Mapping: jsonX → X, jsonY → -Z, height → Y
+ * Three.js: X right, Y up, Z away from camera
+ * Mapping: jsonX → X, jsonY → +Z, height → Y
  */
 function toWorld(x, y) {
-  return new THREE.Vector3(x / 1000, 0, -y / 1000);
+  return new THREE.Vector3(x / 1000, 0, y / 1000);
 }
 
 /**
@@ -54,40 +54,49 @@ export function buildGeometry(plan, materials) {
     addWallLabel(wall, ceilingH, group);
   }
 
+  // --- ROOM LABELS ---
+  for (const room of (plan.rooms || [])) {
+    addRoomLabel(room, group);
+  }
+
   return { group, wallAABBs, ceilingGroup };
 }
 
 function buildFloor(plan, materials, group, ceilingH) {
   // Build floor from room polygons if available, otherwise from plan extents
+  // Base floor covering full plan extent (fills corridors and gaps)
+  const w = plan.metadata.planWidth / 1000;
+  const h = plan.metadata.planHeight / 1000;
+  const baseGeo = new THREE.PlaneGeometry(w, h);
+  baseGeo.rotateX(-Math.PI / 2);
+  const baseMesh = new THREE.Mesh(baseGeo, materials.floor);
+  baseMesh.position.set(w / 2, -0.005, h / 2);
+  baseMesh.receiveShadow = true;
+  group.add(baseMesh);
+
+  // Room-specific floors sit slightly above the base
   if (plan.rooms && plan.rooms.length > 0) {
     for (const room of plan.rooms) {
       const shape = new THREE.Shape();
       const pts = room.polygon;
       // Shape in XY, then rotateX(-PI/2) maps (x, y, 0) → (x, 0, -y)
-      // We want world Z = -jsonY/1000 (matching walls), so shape Y = jsonY/1000
-      shape.moveTo(pts[0][0] / 1000, pts[0][1] / 1000);
+      // We want world Z = +jsonY/1000 (matching walls), so shape Y = -jsonY/1000
+      shape.moveTo(pts[0][0] / 1000, -pts[0][1] / 1000);
       for (let i = 1; i < pts.length; i++) {
-        shape.lineTo(pts[i][0] / 1000, pts[i][1] / 1000);
+        shape.lineTo(pts[i][0] / 1000, -pts[i][1] / 1000);
       }
-      shape.lineTo(pts[0][0] / 1000, pts[0][1] / 1000);
+      shape.lineTo(pts[0][0] / 1000, -pts[0][1] / 1000);
 
       const geo = new THREE.ShapeGeometry(shape);
       geo.rotateX(-Math.PI / 2);
-      const mesh = new THREE.Mesh(geo, materials.floor);
+      const floorMat = room.type === 'external_area' ? materials.terraceFloor : materials.roomFloor;
+      const mesh = new THREE.Mesh(geo, floorMat);
       mesh.receiveShadow = true;
       mesh.position.y = 0;
+      mesh.userData._roomFloor = true;
+      mesh.userData._room = room;
       group.add(mesh);
     }
-  } else {
-    // Fallback: full plan extents
-    const w = plan.metadata.planWidth / 1000;
-    const h = plan.metadata.planHeight / 1000;
-    const geo = new THREE.PlaneGeometry(w, h);
-    geo.rotateX(-Math.PI / 2);
-    const mesh = new THREE.Mesh(geo, materials.floor);
-    mesh.position.set(w / 2, 0, -h / 2);
-    mesh.receiveShadow = true;
-    group.add(mesh);
   }
 }
 
@@ -96,12 +105,12 @@ function buildCeiling(plan, materials, group, ceilingH) {
     for (const room of plan.rooms) {
       const shape = new THREE.Shape();
       const pts = room.polygon;
-      // Ceiling rotateX(PI/2) maps (x, y, 0) → (x, 0, y), so shape Y = -jsonY/1000
-      shape.moveTo(pts[0][0] / 1000, -pts[0][1] / 1000);
+      // Ceiling rotateX(PI/2) maps (x, y, 0) → (x, 0, y), so shape Y = jsonY/1000
+      shape.moveTo(pts[0][0] / 1000, pts[0][1] / 1000);
       for (let i = 1; i < pts.length; i++) {
-        shape.lineTo(pts[i][0] / 1000, -pts[i][1] / 1000);
+        shape.lineTo(pts[i][0] / 1000, pts[i][1] / 1000);
       }
-      shape.lineTo(pts[0][0] / 1000, -pts[0][1] / 1000);
+      shape.lineTo(pts[0][0] / 1000, pts[0][1] / 1000);
 
       const geo = new THREE.ShapeGeometry(shape);
       geo.rotateX(Math.PI / 2); // flip for ceiling (face down)
@@ -121,9 +130,9 @@ function buildCeiling(plan, materials, group, ceilingH) {
  */
 function buildWall(wall, openings, ceilingH, materials, group, wallAABBs) {
   const startX = wall.start[0] / 1000;
-  const startZ = -wall.start[1] / 1000;
+  const startZ = wall.start[1] / 1000;
   const endX = wall.end[0] / 1000;
-  const endZ = -wall.end[1] / 1000;
+  const endZ = wall.end[1] / 1000;
   const thickness = (wall.thickness || 150) / 1000;
 
   const dx = endX - startX;
@@ -226,7 +235,7 @@ function buildWall(wall, openings, ceilingH, materials, group, wallAABBs) {
  */
 function addWallLabel(wall, ceilingH, group) {
   const midX = (wall.start[0] + wall.end[0]) / 2 / 1000;
-  const midZ = -(wall.start[1] + wall.end[1]) / 2 / 1000;
+  const midZ = (wall.start[1] + wall.end[1]) / 2 / 1000;
 
   const canvas = document.createElement('canvas');
   canvas.width = 128;
@@ -247,6 +256,36 @@ function addWallLabel(wall, ceilingH, group) {
   sprite.scale.set(0.6, 0.3, 1);
   sprite.userData._primax = true;
   sprite.userData._wallLabel = true;
+  group.add(sprite);
+}
+
+/**
+ * Add a text label sprite at the center of a room floor.
+ */
+function addRoomLabel(room, group) {
+  const lp = room.labelPosition;
+  if (!lp) return;
+  const cx = lp[0] / 1000;
+  const cz = lp[1] / 1000;
+
+  const name = room.name || room.id;
+  const canvas = document.createElement('canvas');
+  canvas.width = 256;
+  canvas.height = 64;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#555';
+  ctx.font = 'bold 28px system-ui, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(name, 128, 32);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  const mat = new THREE.SpriteMaterial({ map: texture, depthTest: false, transparent: true });
+  const sprite = new THREE.Sprite(mat);
+  sprite.position.set(cx, 0.05, cz);
+  sprite.scale.set(1.2, 0.3, 1);
+  sprite.userData._primax = true;
+  sprite.userData._roomLabel = true;
   group.add(sprite);
 }
 

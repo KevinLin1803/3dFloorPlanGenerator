@@ -31,7 +31,7 @@ export function createOverlay(plan) {
       const mesh = new THREE.Mesh(geo, mat);
       mesh.rotation.x = -Math.PI / 2;
       // Position at center of plan, slightly above floor
-      mesh.position.set(planW / 2, 0.01, -planH / 2);
+      mesh.position.set(planW / 2, 0.01, planH / 2);
       group.add(mesh);
     });
   }
@@ -50,8 +50,8 @@ function createWallWireframe(plan, group) {
 
   for (const wall of plan.walls) {
     const points = [
-      new THREE.Vector3(wall.start[0] / 1000, 0.02, -wall.start[1] / 1000),
-      new THREE.Vector3(wall.end[0] / 1000, 0.02, -wall.end[1] / 1000)
+      new THREE.Vector3(wall.start[0] / 1000, 0.02, wall.start[1] / 1000),
+      new THREE.Vector3(wall.end[0] / 1000, 0.02, wall.end[1] / 1000)
     ];
     const geo = new THREE.BufferGeometry().setFromPoints(points);
     const line = new THREE.Line(geo, material);
@@ -64,8 +64,8 @@ function createWallWireframe(plan, group) {
     const wall = plan.walls.find(w => w.id === opening.wallId);
     if (!wall) continue;
 
-    const sx = wall.start[0] / 1000, sz = -wall.start[1] / 1000;
-    const ex = wall.end[0] / 1000, ez = -wall.end[1] / 1000;
+    const sx = wall.start[0] / 1000, sz = wall.start[1] / 1000;
+    const ex = wall.end[0] / 1000, ez = wall.end[1] / 1000;
     const dx = ex - sx, dz = ez - sz;
     const len = Math.sqrt(dx * dx + dz * dz);
     const dirX = dx / len, dirZ = dz / len;
@@ -98,7 +98,7 @@ function createGridOverlay(plan, group, planW, planH) {
     0x444444,
     0x222222
   );
-  gridHelper.position.set(planW / 2, 0.005, -planH / 2);
+  gridHelper.position.set(planW / 2, 0.005, planH / 2);
   group.add(gridHelper);
 }
 

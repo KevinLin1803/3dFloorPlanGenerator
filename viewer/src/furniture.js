@@ -18,11 +18,11 @@ export function buildFurniture(plan, materials) {
     const d = item.depth / 1000;
     const furnitureGroup = builder(w, d, materials);
 
-    // Position: JSON [x,y] in mm → Three.js (x, 0, -y) in meters
+    // Position: JSON [x,y] in mm → Three.js (x, 0, +y) in meters
     furnitureGroup.position.set(
       item.position[0] / 1000,
       0,
-      -item.position[1] / 1000
+      item.position[1] / 1000
     );
 
     // Rotation: JSON degrees clockwise → Three.js radians around Y (counter-clockwise)

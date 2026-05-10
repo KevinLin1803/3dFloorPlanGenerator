@@ -88,6 +88,21 @@
     #crosshair::before { width: 2px; height: 100%; left: 50%; transform: translateX(-50%); }
     #crosshair::after { height: 2px; width: 100%; top: 50%; transform: translateY(-50%); }
     #crosshair.hidden { display: none; }
+
+    #room-tooltip {
+      position: fixed;
+      pointer-events: none;
+      z-index: 60;
+      background: rgba(0,0,0,0.75);
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      line-height: 1.4;
+      backdrop-filter: blur(8px);
+      display: none;
+      white-space: nowrap;
+    }
   </style>
 </head>
 <body>
@@ -102,6 +117,7 @@
   </div>
 
   <div id="crosshair" class="hidden"></div>
+  <div id="room-tooltip"></div>
 
   <div id="hud"></div>
 
