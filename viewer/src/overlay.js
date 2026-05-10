@@ -46,12 +46,12 @@ export function createOverlay(plan) {
  * Draw parsed walls as colored lines on the floor for verification.
  */
 function createWallWireframe(plan, group) {
-  const material = new THREE.LineBasicMaterial({ color: 0x00ff88, linewidth: 2 });
+  const material = new THREE.LineBasicMaterial({ color: 0x00ff88, linewidth: 2, depthTest: false });
 
   for (const wall of plan.walls) {
     const points = [
-      new THREE.Vector3(wall.start[0] / 1000, 0.02, wall.start[1] / 1000),
-      new THREE.Vector3(wall.end[0] / 1000, 0.02, wall.end[1] / 1000)
+      new THREE.Vector3(wall.start[0] / 1000, 0.08, wall.start[1] / 1000),
+      new THREE.Vector3(wall.end[0] / 1000, 0.08, wall.end[1] / 1000)
     ];
     const geo = new THREE.BufferGeometry().setFromPoints(points);
     const line = new THREE.Line(geo, material);
@@ -59,7 +59,7 @@ function createWallWireframe(plan, group) {
   }
 
   // Draw openings as red markers
-  const openingMat = new THREE.LineBasicMaterial({ color: 0xff4444 });
+  const openingMat = new THREE.LineBasicMaterial({ color: 0xff4444, depthTest: false });
   for (const opening of (plan.openings || [])) {
     const wall = plan.walls.find(w => w.id === opening.wallId);
     if (!wall) continue;
@@ -74,11 +74,11 @@ function createWallWireframe(plan, group) {
     const center = opening.position * len;
 
     const p1 = new THREE.Vector3(
-      sx + dirX * (center - halfW), 0.02,
+      sx + dirX * (center - halfW), 0.08,
       sz + dirZ * (center - halfW)
     );
     const p2 = new THREE.Vector3(
-      sx + dirX * (center + halfW), 0.02,
+      sx + dirX * (center + halfW), 0.08,
       sz + dirZ * (center + halfW)
     );
 

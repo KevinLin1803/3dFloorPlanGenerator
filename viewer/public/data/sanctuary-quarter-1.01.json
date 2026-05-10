@@ -284,6 +284,19 @@
       "thickness": 100
     },
     {
+      "id": "w32",
+      "start": [
+        4025,
+        11800
+      ],
+      "end": [
+        4025,
+        12700
+      ],
+      "thickness": 50
+
+    },
+    {
       "id": "w25",
       "start": [
         4800,
@@ -806,7 +819,7 @@
     { "id": "f3",  "type": "chair",           "position": [700, 1750],   "rotation": 90,  "width": 450,  "depth": 450 },
     { "id": "f4",  "type": "chair",           "position": [2000, 1750],  "rotation": 270, "width": 450,  "depth": 450 },
 
-    { "id": "f5",  "type": "sofa",            "position": [4600, 1150],  "rotation": 180,   "width": 2200, "depth": 850 },
+    { "id": "f5",  "type": "sofa",            "position": [4600, 1150],  "rotation": 180,   "width": 2100, "depth": 850 },
     { "id": "f6",  "type": "chair",           "position": [3550, 2100],  "rotation": 90,  "width": 750,  "depth": 750 },
     { "id": "f7",  "type": "chair",           "position": [3550, 2900],  "rotation": 90,  "width": 750,  "depth": 750 },
     { "id": "f8",  "type": "dining_table",    "position": [4750, 2550],  "rotation": 0,   "width": 1000, "depth": 600 },
@@ -818,9 +831,8 @@
     { "id": "f13", "type": "kitchen_counter", "position": [1850, 5800],  "rotation": 0,   "width": 600,  "depth": 450 },
     { "id": "f14", "type": "fridge",          "position": [450, 5800],  "rotation": 0,   "width": 700,  "depth": 502 },
 
-    { "id": "f15", "type": "bathtub",         "position": [550, 6800],   "rotation": 0,   "width": 900,  "depth": 900 },
-    { "id": "f16", "type": "toilet",          "position": [1650, 7000],  "rotation": 0,   "width": 450,  "depth": 700 },
-    { "id": "f17", "type": "sink",            "position": [2350, 7200],  "rotation": 0,   "width": 700,  "depth": 450 },
+    { "id": "f16", "type": "toilet",          "position": [900, 7000],  "rotation": 0,   "width": 450,  "depth": 700 },
+    { "id": "f17", "type": "sink",            "position": [1900, 7200],  "rotation": 0,   "width": 700,  "depth": 450 },
 
     { "id": "f18", "type": "bed_double",      "position": [5300, 6000],  "rotation": 0,   "width": 1530, "depth": 2030 },
     { "id": "f19", "type": "wardrobe",        "position": [4700, 4500],  "rotation": 180,   "width": 1800, "depth": 450 },
@@ -838,9 +850,7 @@
     { "id": "f31", "type": "desk",            "position": [10200, 12050],"rotation": 0,   "width": 350,  "depth": 350 },
 
     { "id": "f32", "type": "washing_machine", "position": [4425, 12350], "rotation": 0,   "width": 600,  "depth": 600 },
-    { "id": "f33", "type": "sink",            "position": [4425, 11650], "rotation": 0,   "width": 600,  "depth": 500 },
-    { "id": "f34", "type": "bathtub",         "position": [5250, 11950], "rotation": 0,   "width": 900,  "depth": 900 },
-    { "id": "f35", "type": "toilet",          "position": [6100, 12350], "rotation": 0,   "width": 450,  "depth": 700 },
-    { "id": "f36", "type": "sink",            "position": [6900, 12350], "rotation": 0,   "width": 700,  "depth": 450 }
+    { "id": "f35", "type": "toilet",          "position": [5600, 12350], "rotation": 0,   "width": 450,  "depth": 700 },
+    { "id": "f36", "type": "sink",            "position": [6600, 12350], "rotation": 0,   "width": 700,  "depth": 450 }
   ]
 }

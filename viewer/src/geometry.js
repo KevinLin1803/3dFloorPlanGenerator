@@ -49,10 +49,6 @@ export function buildGeometry(plan, materials) {
     buildWall(wall, openings, ceilingH, materials, group, wallAABBs);
   }
 
-  // --- WALL LABELS ---
-  for (const wall of plan.walls) {
-    addWallLabel(wall, ceilingH, group);
-  }
 
   // --- ROOM LABELS ---
   for (const room of (plan.rooms || [])) {
